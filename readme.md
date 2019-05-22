@@ -29,6 +29,7 @@ Add Service Provider to `config/app.php` in `providers` section
 Sarfraznawaz2005\PLogs\ServiceProvider::class,
 ```
 
+
 ---
 
 Publish package's config and migration files by running below command:
