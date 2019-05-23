@@ -93,6 +93,14 @@ class ServiceProvider extends BaseServiceProvider
                     }
                 }
 
+                $extraInfo = $this->logExtrainfo();
+
+                if (strpos($stack, "\n")) {
+                    $stack = preg_replace("/\n/", "\n" . $extraInfo . "\n\n", $stack, 1);
+                } else {
+                    $stack .= $extraInfo . "\n\n";
+                }
+
                 DB::table('plogs')->insert([
                     'level' => $level,
                     'message' => $message,
@@ -115,5 +123,34 @@ class ServiceProvider extends BaseServiceProvider
     public function provides()
     {
         return ['plogs'];
+    }
+
+    protected function logExtrainfo()
+    {
+        $info = '';
+
+        if (isset($_SERVER['REMOTE_ADDR'])) {
+            $info .= 'IP: ' . $_SERVER['REMOTE_ADDR'];
+        }
+
+        if (isset($_SERVER['REQUEST_URI'])) {
+            $info .= "\n" . $_SERVER['REQUEST_METHOD'] . ' ' . url($_SERVER['REQUEST_URI']);
+        }
+
+        if (isset($_SERVER['HTTP_REFERER'])) {
+            $info .= "\nReferer: " . $_SERVER['HTTP_REFERER'];
+        }
+
+        if (\Auth::check()) {
+            $info .= "\n" . 'User:' . \Auth::user()->id . ' (' . \Auth::user()->email . ')';
+        }
+
+        if ($info) {
+            $dots = str_repeat('=', 50);
+
+            $info = "\n$dots\n$info\n$dots";
+        }
+
+        return $info;
     }
 }
