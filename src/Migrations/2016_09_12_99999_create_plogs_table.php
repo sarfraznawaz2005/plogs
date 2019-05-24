@@ -16,7 +16,7 @@ class CreatePLogsTable extends Migration
         Schema::create('plogs', function (Blueprint $table) {
             $table->increments('id');
             $table->string('level');
-            $table->string('message')->nullable();
+            $table->text('message')->nullable();
             $table->text('stack')->nullable();
             $table->string('level_class')->nullable();
             $table->string('level_img')->nullable();
