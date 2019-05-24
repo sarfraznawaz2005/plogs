@@ -11,8 +11,8 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 class ServiceProvider extends BaseServiceProvider
 {
     private static $levelsClasses = [
-        'debug' => 'info',
-        'info' => 'info',
+        'debug' => 'default',
+        'info' => 'primary',
         'notice' => 'info',
         'warning' => 'warning',
         'error' => 'danger',
