@@ -112,12 +112,14 @@ class ServiceProvider extends BaseServiceProvider
             }
         }
 
-        $extraInfo = $this->logExtrainfo();
+        if (config('plogs.extra_info')) {
+            $extraInfo = $this->logExtrainfo();
 
-        if (strpos($stack, "\n")) {
-            $stack = preg_replace("/\n/", "\n" . $extraInfo . "\n\n", $stack, 1);
-        } else {
-            $stack .= $extraInfo . "\n\n";
+            if (strpos($stack, "\n")) {
+                $stack = preg_replace("/\n/", "\n" . $extraInfo . "\n\n", $stack, 1);
+            } else {
+                $stack .= $extraInfo . "\n\n";
+            }
         }
 
         if (\in_array('all', $levels, true) || \in_array($level, $levels, true)) {
