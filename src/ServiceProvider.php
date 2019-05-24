@@ -72,93 +72,12 @@ class ServiceProvider extends BaseServiceProvider
         $version = $versionArray[0] . $versionArray[1];
 
         if ($version < 54) {
-
             Event::listen('illuminate.log', function ($level, $message, $context) {
-
-                if (!config('plogs.enabled')) {
-                    return false;
-                }
-
-                $levels = config('plogs.levels');
-
-                if (\in_array('all', $levels, true) || \in_array($level, $levels, true)) {
-
-                    $stack = '';
-                    $levelClass = self::$levelsClasses[$level];
-                    $levelImg = self::$levelsImgs[$level];
-
-                    if ($context) {
-                        $errorObject = collect($context)->first();
-
-                        if ($errorObject && $errorObject instanceof \Exception) {
-                            $stack = $errorObject->getTraceAsString();
-                        }
-                    }
-
-                    $extraInfo = $this->logExtrainfo();
-
-                    if (strpos($stack, "\n")) {
-                        $stack = preg_replace("/\n/", "\n" . $extraInfo . "\n\n", $stack, 1);
-                    } else {
-                        $stack .= $extraInfo . "\n\n";
-                    }
-
-                    DB::table('plogs')->insert([
-                        'level' => $level,
-                        'message' => $message,
-                        'stack' => trim($stack),
-                        'level_class' => $levelClass,
-                        'level_img' => $levelImg,
-                        'created_at' => Carbon::now()
-                    ]);
-
-                }
+                $this->saveRecord($level, $message, $context);
             });
-
         } else {
-
             Event::listen(MessageLogged::class, function (MessageLogged $e) {
-
-                if (!config('plogs.enabled')) {
-                    return false;
-                }
-
-                $levels = config('plogs.levels');
-
-                if (\in_array('all', $levels, true) || \in_array($e->level, $levels, true)) {
-
-                    $stack = '';
-                    $level = $e->level;
-                    $message = $e->message;
-                    $levelClass = self::$levelsClasses[$level];
-                    $levelImg = self::$levelsImgs[$level];
-
-                    if ($e->context) {
-                        $errorObject = collect($e->context)->first();
-
-                        if ($errorObject && $errorObject instanceof \Exception) {
-                            $stack = $errorObject->getTraceAsString();
-                        }
-                    }
-
-                    $extraInfo = $this->logExtrainfo();
-
-                    if (strpos($stack, "\n")) {
-                        $stack = preg_replace("/\n/", "\n" . $extraInfo . "\n\n", $stack, 1);
-                    } else {
-                        $stack .= $extraInfo . "\n\n";
-                    }
-
-                    DB::table('plogs')->insert([
-                        'level' => $level,
-                        'message' => $message,
-                        'stack' => trim($stack),
-                        'level_class' => $levelClass,
-                        'level_img' => $levelImg,
-                        'created_at' => Carbon::now()
-                    ]);
-
-                }
+                $this->saveRecord($e->level, $e->message, $e->context);
             });
         }
     }
@@ -171,6 +90,48 @@ class ServiceProvider extends BaseServiceProvider
     public function provides()
     {
         return ['plogs'];
+    }
+
+    protected function saveRecord($level, $message, $context)
+    {
+        if (!config('plogs.enabled')) {
+            return false;
+        }
+
+        $levels = config('plogs.levels');
+
+        $stack = '';
+        $levelClass = self::$levelsClasses[$level];
+        $levelImg = self::$levelsImgs[$level];
+
+        if ($context) {
+            $errorObject = collect($context)->first();
+
+            if ($errorObject && $errorObject instanceof \Exception) {
+                $stack = $errorObject->getTraceAsString();
+            }
+        }
+
+        $extraInfo = $this->logExtrainfo();
+
+        if (strpos($stack, "\n")) {
+            $stack = preg_replace("/\n/", "\n" . $extraInfo . "\n\n", $stack, 1);
+        } else {
+            $stack .= $extraInfo . "\n\n";
+        }
+
+        if (\in_array('all', $levels, true) || \in_array($level, $levels, true)) {
+            if ($message) {
+                DB::table('plogs')->insert([
+                    'level' => $level,
+                    'message' => $message,
+                    'stack' => trim($stack),
+                    'level_class' => $levelClass,
+                    'level_img' => $levelImg,
+                    'created_at' => Carbon::now()
+                ]);
+            }
+        }
     }
 
     protected function logExtrainfo()
