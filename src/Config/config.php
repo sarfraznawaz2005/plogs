@@ -18,6 +18,9 @@ return [
     // if "true", extra info such as IP, URL, Referer and User will be added to each log if available.
     'extra_info' => true,
 
+    // if "true", laravel.lgo file will be cleaned up automatically
+    'clean_log' => true,
+
     // if "true", the PLogs page can be viewed by any user who provides
     // correct login information (eg all app users).
     'http_authentication' => false,

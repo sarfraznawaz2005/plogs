@@ -27,6 +27,10 @@ class Controller extends BaseController
             DB::table('plogs')->where('created_at', '<', Carbon::now()->subDays($days))->delete();
         }
 
+        if (config('plogs.clean_log')) {
+            file_put_contents(storage_path('logs/laravel.log'), '');
+        }
+
         // get all records
         $logs = DB::table('plogs')->get();
 
