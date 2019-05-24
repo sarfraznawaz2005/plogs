@@ -21,6 +21,8 @@ class CreatePLogsTable extends Migration
             $table->string('level_class')->nullable();
             $table->string('level_img')->nullable();
             $table->dateTime('created_at');
+
+            $table->index('created_at');
         });
     }
 

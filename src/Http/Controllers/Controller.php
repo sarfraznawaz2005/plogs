@@ -24,7 +24,7 @@ class Controller extends BaseController
         $days = config('plogs.delete_old_days');
 
         if ($days) {
-            DB::table('plogs')->where('created_at', '<', Carbon::now()->subDays($days))->delete();
+            DB::table('plogs')->where('created_at', '<=', Carbon::now()->subDays($days))->delete();
         }
 
         if (config('plogs.clean_log')) {
@@ -32,7 +32,7 @@ class Controller extends BaseController
         }
 
         // get all records
-        $logs = DB::table('plogs')->get();
+        $logs = DB::table('plogs')->where('created_at', '>=', Carbon::now()->subDays($days))->get();
 
         return view('plogs::view', compact('logs'));
     }
