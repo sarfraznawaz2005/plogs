@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PLogs</title>
+    <title>Logs</title>
 
     <link rel="shortcut icon" href="/logs.ico">
 
@@ -68,43 +68,6 @@
                     <th>&nbsp;</th>
                 </tr>
                 </tfoot>
-
-                <tbody>
-
-                @foreach($logs as $key => $log)
-                    <tr data-display="stack{{{$key}}}">
-
-                        <td class="text-{{{$log->level_class}}} level" data-value="{{ucfirst($log->level)}}">
-                                <span class="label label-{{{$log->level_class}}}">
-                                    <span class="glyphicon glyphicon-{{{$log->level_img}}}-sign"></span>
-                                    &nbsp;{{ucfirst($log->level)}}
-                                </span>
-                        </td>
-
-                        <td class="date" data-value="{{$log->created_at}}">
-                            {{{$log->created_at}}}
-                        </td>
-
-                        <td class="text">
-                            @if ($log->stack)
-                                <a class="pull-right expand btn btn-success btn-xs"
-                                   data-display="stack{{{$key}}}">
-                                    <span class="glyphicon glyphicon-zoom-in"></span>
-                                </a>
-                            @endif
-
-                            {{{$log->message}}}
-
-                            @if ($log->stack)
-                                <div class="stack" id="stack{{{$key}}}"
-                                     style="display: none; white-space: pre-wrap;">{{{ trim($log->stack) }}}
-                                </div>
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
-
-                </tbody>
             </table>
 
         </div>
@@ -118,70 +81,59 @@
 
 <script>
     $(document).ready(function () {
-        $('.table-container tr').on('click', function () {
+        $(document).on('click', '.toggleDetails', function () {
             $('#' + $(this).data('display')).toggle();
         });
 
         var table = $('#table-log').DataTable({
+            "serverSide": true,
+            "processing": true,
+            "responsive": true,
+            "autoWidth": false,
+            "bSortClasses": false,
+            "pageLength": {{ config('plogs.entries_per_page') }},
             "order": [1, 'desc'],
+            "ajax": {
+                "url": "{{ route('__plogstable__') }}",
+                "dataType": "json",
+                "type": "POST",
+                "data": {_token: "{{csrf_token()}}"}
+            },
+            "columns": [
+                {data: 'level'},
+                {data: 'created_at'},
+                {data: 'message'}
+            ],
             "columnDefs": [
                 {"width": "1%", "targets": 0},
-                {"width": "1%", "targets": 1}
+                {"width": "13%", "targets": 1}
             ],
-            "responsive": true,
-            "pageLength": 10,
-            "autoWidth": false
-        });
+            "initComplete": function (settings, json) {
+                $("#table-log tfoot th:not(:last)").each(function (i) {
+                    var select = $('<select style="width: 100%;"><option value=""></option></select>')
+                        .appendTo($(this).empty())
+                        .on('change', function () {
+                            table.column(i)
+                                .search($(this).val(), true, false)
+                                .draw();
+                        });
 
-        ///////////////////////////////////////////////////////////////
-        // filter columns
-        var dates = [];
-
-        $("#table-log tfoot th:not(:last)").each(function (i) {
-            var select = $('<select style="width: 100%;"><option value=""></option></select>')
-                .appendTo($(this).empty())
-                .on('change', function () {
-                    table.column(i)
-                        .search($(this).val(), true, false)
-                        .draw();
+                    if (i == 0) {
+                        @foreach($levels as $level)
+                        select.append('<option value="{{$level}}">{{ucfirst($level)}}</option>');
+                        @endforeach
+                    }
+                    else {
+                        @foreach($dates as $date)
+                        select.append('<option value="{{$date}}">{{ucfirst($date)}}</option>');
+                        @endforeach
+                    }
                 });
 
-            table.column(i).data().unique().sort().each(function (d, j) {
-                var val = d;
-
-                // remove html in case of first/type column
-                if (i === 0) {
-                    val = $(d).text().replace(/\s/g, '');
-                }
-                // remove time in case of date column
-                else if (i === 1) {
-                    val = d.split(' ')[0];
-
-                    if (jQuery.inArray(val, dates) !== -1) {
-                        // continue
-                        return true;
-                    }
-
-                    dates.push(val);
-
-                    // we will populate date column later with dates in descending order
-                    return true;
-                }
-
-                select.append('<option value="' + val + '">' + val + '</option>')
-            });
+                // put filters on header
+                $('tfoot').css('display', 'table-header-group');
+            }
         });
-
-        // populate dates select box
-        $(dates).sort(function (a, b) {
-            return a > b ? -1 : a < b ? 1 : 0;
-        }).each(function (i, v) {
-            $('tfoot select:eq(1)').append('<option value="' + v + '">' + v + '</option>')
-        });
-
-        // put filters on header
-        $('tfoot').css('display', 'table-header-group');
-        ///////////////////////////////////////////////////////////////
 
     });
 </script>
