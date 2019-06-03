@@ -96,7 +96,7 @@
             "ajax": {
                 "url": "{{ route('__plogstable__') }}",
                 "dataType": "json",
-                "type": "POST",
+                "type": "GET",
                 "data": {_token: "{{csrf_token()}}"}
             },
             "columns": [

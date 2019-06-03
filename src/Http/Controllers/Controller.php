@@ -34,12 +34,26 @@ class Controller extends BaseController
             file_put_contents(storage_path('logs/laravel.log'), '');
         }
 
-        $levels = DB::table('plogs')->pluck('level')->unique();
+        $levels = DB::table('plogs')->get();
+        $levels = collect($levels)->pluck('level');
 
-        $dates = DB::table('plogs')->pluck('created_at');
-        $dates = $dates->map(function ($date) {
-            return date('Y-m-d', strtotime($date));
-        })->unique();
+        if (!is_string($levels)) {
+            $levels = $levels->unique();
+        } else {
+            $levels = (array)$levels;
+        }
+
+
+        $dates = DB::table('plogs')->get();
+        $dates = collect($dates)->pluck('created_at');
+
+        if (!is_string($dates)) {
+            $dates = $dates->map(function ($date) {
+                return date('Y-m-d', strtotime($date));
+            })->unique();
+        } else {
+            $dates = (array)$dates;
+        }
 
         return view('plogs::view', compact('levels', 'dates'));
     }

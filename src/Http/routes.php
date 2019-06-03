@@ -7,7 +7,7 @@ Route::group(
     ],
     function () {
         Route::get('/', 'Controller@index');
-        Route::post('/table', 'Controller@table')->name('__plogstable__');
+        Route::get('/table', 'Controller@table')->name('__plogstable__');
     }
 );
 
