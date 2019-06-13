@@ -112,6 +112,18 @@ class ServiceProvider extends BaseServiceProvider
             }
         }
 
+        if (is_object($message)) {
+            $stack = $message->getTraceAsString();
+            $class = get_class($message);
+
+            if (false !== strpos($class, '\\')) {
+                $pieces = explode('\\', $class);
+                $class = end($pieces);
+            }
+
+            $message = $class . ' : ' . $message->getMessage();
+        }
+
         if (config('plogs.extra_info')) {
             $extraInfo = $this->logExtrainfo();
 
