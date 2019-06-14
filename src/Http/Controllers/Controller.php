@@ -87,6 +87,7 @@ class Controller extends BaseController
             $cols = $request->all()['columns'];
             $q = Plog::query();
             $isFilter = false;
+
             foreach ($cols as $col) {
                 if ($query = $col['search']['value']) {
                     $field = $col['data'];
@@ -97,11 +98,13 @@ class Controller extends BaseController
             }
 
             if ($isFilter) {
+                $totalFiltered = $q->count();
+
                 $entries = $q
                     ->orderBy($order, $dir)
+                    ->offset($start)
+                    ->limit($limit)
                     ->get();
-
-                $totalFiltered = $q->count();
             }
 
         } else {
