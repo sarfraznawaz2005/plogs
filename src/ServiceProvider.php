@@ -101,27 +101,39 @@ class ServiceProvider extends BaseServiceProvider
         $levels = config('plogs.levels');
 
         $stack = '';
+        $class = '';
         $levelClass = self::$levelsClasses[$level];
         $levelImg = self::$levelsImgs[$level];
 
         if ($context) {
-            $errorObject = collect($context)->first();
+            if (isset($context['exception'])) {
+                $errorObject = $context['exception'];
+            } else {
+                $errorObject = collect($context)->first();
+            }
 
             if ($errorObject && $errorObject instanceof \Exception) {
                 $stack = $errorObject->getTraceAsString();
+                $class = get_class($errorObject);
             }
         }
 
         if (is_object($message)) {
             $stack = $message->getTraceAsString();
             $class = get_class($message);
+        }
 
-            if (false !== strpos($class, '\\')) {
-                $pieces = explode('\\', $class);
-                $class = end($pieces);
+        if ($class && false !== strpos($class, '\\')) {
+            $pieces = explode('\\', $class);
+            $class = end($pieces);
+        }
+
+        if ($class) {
+            if (is_object($message)) {
+                $message = $class . ' : ' . $message->getMessage();
+            } else {
+                $message = $class . ' : ' . $message;
             }
-
-            $message = $class . ' : ' . $message->getMessage();
         }
 
         if (config('plogs.extra_info')) {
