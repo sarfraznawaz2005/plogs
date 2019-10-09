@@ -170,6 +170,6 @@ class ServiceProvider extends BaseServiceProvider
             $info = $dots . $info . $dots;
         }
 
-        return "<div>$info</div><br>";
+        return $info;
     }
 }
