@@ -158,7 +158,7 @@ HTML;
                     <span class="toggleDetails" data-display="stack$key">$message</span>                    
                     
                     <div class="stack toggleDetails" data-display="stack$key" id="stack$key"
-                         style="display: none; white-space: pre-wrap;">$stack
+                         style="display: none;">$stack
                     </div>
 HTML;
                 } else {

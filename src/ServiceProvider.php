@@ -7,6 +7,8 @@ use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Symfony\Component\Debug\Exception\FlattenException;
+use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -101,7 +103,7 @@ class ServiceProvider extends BaseServiceProvider
         $levels = config('plogs.levels');
 
         $stack = '';
-        $class = '';
+        $errorObject = null;
         $levelClass = self::$levelsClasses[$level];
         $levelImg = self::$levelsImgs[$level];
 
@@ -111,39 +113,21 @@ class ServiceProvider extends BaseServiceProvider
             } else {
                 $errorObject = collect($context)->first();
             }
-
-            if ($errorObject && $errorObject instanceof \Exception) {
-                $stack = $errorObject->getTraceAsString();
-                $class = get_class($errorObject);
-            }
         }
 
         if (is_object($message)) {
-            $stack = $message->getTraceAsString();
-            $class = get_class($message);
+            $errorObject = $message;
+            $message = $message->getMessage();
         }
 
-        if ($class && false !== strpos($class, '\\')) {
-            $pieces = explode('\\', $class);
-            $class = end($pieces);
-        }
-
-        if ($class) {
-            if (is_object($message)) {
-                $message = $class . ' : ' . $message->getMessage();
-            } else {
-                $message = $class . ' : ' . $message;
-            }
+        if (is_object($errorObject)) {
+            $e = FlattenException::create($errorObject);
+            $handler = new SymfonyExceptionHandler();
+            $stack = $handler->getHtml($e);
         }
 
         if (config('plogs.extra_info')) {
-            $extraInfo = $this->logExtrainfo();
-
-            if (strpos($stack, "\n")) {
-                $stack = preg_replace("/\n/", "\n" . $extraInfo . "\n\n", $stack, 1);
-            } else {
-                $stack .= $extraInfo . "\n\n";
-            }
+            $stack = $this->logExtrainfo() . $stack;
         }
 
         if (\in_array('all', $levels, true) || \in_array($level, $levels, true)) {
@@ -165,27 +149,27 @@ class ServiceProvider extends BaseServiceProvider
         $info = '';
 
         if (isset($_SERVER['REMOTE_ADDR'])) {
-            $info .= 'IP: ' . $_SERVER['REMOTE_ADDR'];
+            $info .= 'IP: ' . $_SERVER['REMOTE_ADDR'] . '<br>';
         }
 
         if (isset($_SERVER['REQUEST_URI'])) {
-            $info .= "\n" . $_SERVER['REQUEST_METHOD'] . ' ' . url($_SERVER['REQUEST_URI']);
+            $info .= $_SERVER['REQUEST_METHOD'] . ' ' . url($_SERVER['REQUEST_URI']) . '<br>';
         }
 
         if (isset($_SERVER['HTTP_REFERER'])) {
-            $info .= "\nReferer: " . $_SERVER['HTTP_REFERER'];
+            $info .= "Referer: " . $_SERVER['HTTP_REFERER'] . '<br>';
         }
 
         if (\Auth::check()) {
-            $info .= "\n" . 'User:' . \Auth::user()->id . ' (' . \Auth::user()->email . ')';
+            $info .= 'User:' . \Auth::user()->id . ' (' . \Auth::user()->email . ')' . '<br>';
         }
 
         if ($info) {
-            $dots = str_repeat('=', 50);
+            $dots = str_repeat('-', 150) . '<br>';
 
-            $info = "\n$dots\n$info\n$dots";
+            $info = $dots . $info . $dots;
         }
 
-        return $info;
+        return "<div>$info</div><br>";
     }
 }
