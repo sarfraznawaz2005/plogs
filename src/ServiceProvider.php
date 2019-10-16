@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
@@ -107,40 +108,44 @@ class ServiceProvider extends BaseServiceProvider
         $levelClass = self::$levelsClasses[$level];
         $levelImg = self::$levelsImgs[$level];
 
-        if ($context) {
-            if (isset($context['exception'])) {
-                $errorObject = $context['exception'];
-            } else {
-                $errorObject = collect($context)->first();
+        try {
+            if ($context) {
+                if (isset($context['exception'])) {
+                    $errorObject = $context['exception'];
+                } else {
+                    $errorObject = collect($context)->first();
+                }
             }
-        }
 
-        if (is_object($message)) {
-            $errorObject = $message;
-            $message = $message->getMessage();
-        }
-
-        if (is_object($errorObject)) {
-            $e = FlattenException::create($errorObject);
-            $handler = new SymfonyExceptionHandler();
-            $stack = $handler->getHtml($e);
-        }
-
-        if (config('plogs.extra_info')) {
-            $stack = $this->logExtrainfo() . $stack;
-        }
-
-        if (\in_array('all', $levels, true) || \in_array($level, $levels, true)) {
-            if ($message) {
-                DB::table('plogs')->insert([
-                    'level' => $level,
-                    'message' => $message,
-                    'stack' => trim($stack),
-                    'level_class' => $levelClass,
-                    'level_img' => $levelImg,
-                    'created_at' => Carbon::now()
-                ]);
+            if (is_object($message)) {
+                $errorObject = $message;
+                $message = $message->getMessage();
             }
+
+            if (is_object($errorObject)) {
+                $e = FlattenException::create($errorObject);
+                $handler = new SymfonyExceptionHandler();
+                $stack = $handler->getHtml($e);
+            }
+
+            if (config('plogs.extra_info')) {
+                $stack = $this->logExtrainfo() . $stack;
+            }
+
+            if (\in_array('all', $levels, true) || \in_array($level, $levels, true)) {
+                if ($message) {
+                    DB::table('plogs')->insert([
+                        'level' => $level,
+                        'message' => $message,
+                        'stack' => trim($stack),
+                        'level_class' => $levelClass,
+                        'level_img' => $levelImg,
+                        'created_at' => Carbon::now()
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
         }
     }
 
