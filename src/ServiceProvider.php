@@ -126,15 +126,7 @@ class ServiceProvider extends BaseServiceProvider
             $stack = $handler->getHtml($e);
         }
 
-        if (strlen($stack) > 50000) {
-            $stack = substr($stack, 0, 50000);
-
-            if (class_exists('DOMDocument')) {
-                $dom = new \DOMDocument;
-                $dom->loadHTML($stack);
-                $stack = $dom->saveXML();
-            }
-        }
+        $stack = substr($stack, 0, 50000);
 
         if (config('plogs.extra_info')) {
             $stack = $this->logExtrainfo() . $stack;
