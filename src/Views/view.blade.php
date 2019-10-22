@@ -15,7 +15,7 @@
 
     <style>
         body {
-            padding: 10px;
+            padding: 10px 0;
         }
 
         .stack {
@@ -42,7 +42,7 @@
         }
 
         thead tr {
-            background-image: radial-gradient(#ffe773, #d9bd36);
+            background-image: radial-gradient(#eee, #ddd);
         }
     </style>
 </head>
