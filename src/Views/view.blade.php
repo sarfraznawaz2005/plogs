@@ -16,6 +16,7 @@
     <style>
         body {
             padding: 10px 0;
+            background-color: #f9f9f9;
         }
 
         .stack {
@@ -43,6 +44,10 @@
 
         thead tr {
             background-image: radial-gradient(#eee, #ddd);
+        }
+
+        tfoot > tr > th {
+            background-color: #e0e0e0;
         }
     </style>
 </head>
@@ -122,8 +127,7 @@
                         @foreach($levels as $level)
                         select.append('<option value="{{$level}}">{{ucfirst($level)}}</option>');
                         @endforeach
-                    }
-                    else {
+                    } else {
                         @foreach($dates as $date)
                         select.append('<option value="{{$date}}">{{ucfirst($date)}}</option>');
                         @endforeach
