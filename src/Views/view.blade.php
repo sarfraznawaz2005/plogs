@@ -49,6 +49,11 @@
         tfoot > tr > th {
             background-color: #e0e0e0;
         }
+
+        table {
+            background-color: #fff;
+        }
+
     </style>
 </head>
 <body>
