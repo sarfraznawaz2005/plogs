@@ -62,7 +62,7 @@
     <div class="row">
         <div class="col-sm-12 col-md-12 table-container">
 
-            <table id="table-log" class="table table-bordered table-hover table-condensed">
+            <table id="table-log" class="table table-bordered table-condensed">
                 <thead>
                 <tr>
                     <th>Type</th>
@@ -91,6 +91,7 @@
 
 <script>
     $(document).ready(function () {
+
         $(document).on('click', '.toggleDetails', function () {
             $('#' + $(this).data('display')).toggle();
         });
@@ -141,10 +142,29 @@
 
                 // put filters on header
                 $('tfoot').css('display', 'table-header-group');
+
+                // apply diff color to logs of today
+                $("#table-log td:nth-child(2)").each(function (i, v) {
+                    var date = $(v).text().trim();
+
+                    if (isTodayDate(date)) {
+                        $(this).closest('tr').addClass('warning');
+                    }
+                });
             }
         });
 
     });
+
+    function isTodayDate(date) {
+        var today = new Date();
+        date = new Date(date);
+
+        return date.getDate() == today.getDate() &&
+            date.getMonth() == today.getMonth() &&
+            date.getFullYear() == today.getFullYear()
+    }
+
 </script>
 </body>
 </html>
