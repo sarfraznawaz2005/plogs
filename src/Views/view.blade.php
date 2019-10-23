@@ -129,7 +129,7 @@
                                 .draw();
                         });
 
-                    if (i == 0) {
+                    if (i === 0) {
                         @foreach($levels as $level)
                         select.append('<option value="{{$level}}">{{ucfirst($level)}}</option>');
                         @endforeach
@@ -142,16 +142,18 @@
 
                 // put filters on header
                 $('tfoot').css('display', 'table-header-group');
-
-                // apply diff color to logs of today
-                $("#table-log td:nth-child(2)").each(function (i, v) {
-                    var date = $(v).text().trim();
-
-                    if (isTodayDate(date)) {
-                        $(this).closest('tr').addClass('warning');
-                    }
-                });
             }
+        });
+
+        table.on('draw', function () {
+            // apply diff color to logs of today
+            $("#table-log td:nth-child(2)").each(function (i, v) {
+                var date = $(v).text().trim();
+
+                if (isTodayDate(date)) {
+                    $(this).closest('tr').addClass('warning');
+                }
+            });
         });
 
     });
