@@ -151,7 +151,7 @@
                 var date = $(v).text().trim();
 
                 if (isTodayDate(date)) {
-                    $(this).closest('tr').addClass('warning');
+                    $(this).css('background', '#eee');
                 }
             });
         });
