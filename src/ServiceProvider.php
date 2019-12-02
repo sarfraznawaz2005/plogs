@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Symfony\Component\Debug\Exception\FlattenException;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
@@ -97,6 +98,10 @@ class ServiceProvider extends BaseServiceProvider
     protected function saveRecord($level, $message, $context)
     {
         if (!config('plogs.enabled')) {
+            return false;
+        }
+
+        if (!Schema::hasTable('plogs')) {
             return false;
         }
 
