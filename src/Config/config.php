@@ -3,7 +3,7 @@
 return [
 
     // enable or disable plogs.
-    'enabled' => env('ENABLE_PLOGS', true),
+    'enabled' => env('ENABLE_PLOGS', false),
 
     // route where visitlog will be available in your app.
     'route' => 'plogs',
