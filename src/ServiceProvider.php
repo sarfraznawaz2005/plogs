@@ -166,6 +166,33 @@ class ServiceProvider extends BaseServiceProvider
             $info .= 'User:' . \Auth::user()->id . ' (' . \Auth::user()->email . ')' . '<br>';
         }
 
+        if (config('plogs.request_info', false)) {
+            $requestArray = request()->except(config('plogs.request_info_except', []));
+
+            if ($requestArray) {
+                $info .= '<br><strong>Request:</strong><br>';
+                $info .= '<pre>' . json_encode($requestArray, JSON_PRETTY_PRINT) . '</pre>';
+            }
+        }
+
+        if (config('plogs.session_info', false)) {
+            $sessionArray = session()->all();
+
+            if ($sessionArray) {
+                $info .= '<br><strong>Session:</strong><br>';
+                $info .= '<pre>' . json_encode($sessionArray, JSON_PRETTY_PRINT) . '</pre>';
+            }
+        }
+
+        if (config('plogs.header_info', false)) {
+            $headerArray = request()->header();
+
+            if ($headerArray) {
+                $info .= '<br><strong>Headers:</strong><br>';
+                $info .= '<pre>' . json_encode($headerArray, JSON_PRETTY_PRINT) . '</pre>';
+            }
+        }
+        
         if ($info) {
             $dots = str_repeat('-', 150) . '<br>';
 

@@ -21,6 +21,16 @@ return [
     // if "true", extra info such as IP, URL, Referer and User will be added to each log if available.
     'extra_info' => true,
 
+    // if "true", request data will also be logged
+    'request_info' => true,
+    'request_info_except' => ['password', 'confirm_password', 'password_confirmation', 'api_token', '_token'],
+
+    // if "true", session info will also be logged
+    'session_info' => false,
+
+    // if "true", headers will also be logged
+    'header_info' => false,
+
     // if "true", laravel.lgo file will be cleaned up automatically
     'clean_log' => true,
 
